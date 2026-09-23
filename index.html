@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phòng thí nghiệm Faraday</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #68747b;
+      --cream: #f4efe6;
+      --paper: #fffdf7;
+      --red: #d9413c;
+      --red-dark: #a82a31;
+      --copper: #b56a3b;
+      --teal: #177e89;
+      --line: #d8d0c3;
+      --glow: #ffd86a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      color: var(--ink);
+      font-family: Arial, sans-serif;
+      background: #ffffff;
+    }
+
+    .app { width: min(1180px, 100%); margin: 0 auto; }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 20px 0 30px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--red-dark);
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, p { margin-top: 0; }
+    h1 {
+      max-width: 650px;
+      margin-bottom: 12px;
+      font-family: Georgia, serif;
+      font-size: clamp(2.4rem, 6vw, 5.4rem);
+      line-height: 0.93;
+      letter-spacing: -0.045em;
+    }
+
+    .subtitle { max-width: 620px; margin-bottom: 0; color: var(--muted); line-height: 1.55; }
+
+    .status {
+      min-width: 190px;
+      padding: 15px 17px;
+      border-left: 3px solid var(--teal);
+      background: rgba(255, 253, 247, 0.72);
+    }
+
+    .status small { display: block; margin-bottom: 6px; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    .status strong { font-size: 1.05rem; }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 26px; margin-top: 28px; }
+
+    .experiment {
+      min-width: 0;
+      padding: clamp(20px, 4vw, 42px);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 20px 48px rgba(60, 50, 39, 0.08);
+    }
+
+    .experiment-head { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
+    .experiment h2 { margin-bottom: 7px; font-family: Georgia, serif; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+    .experiment-head p { margin-bottom: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+    .score { color: var(--red-dark); font-weight: 800; white-space: nowrap; }
+
+    .lab {
+      position: relative;
+      height: 390px;
+      margin-top: 28px;
+      overflow: hidden;
+      border: 1px solid #e5ddcf;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px), #050505;
+      background-size: 28px 28px;
+      touch-action: none;
+    }
+
+    .coil {
+      position: absolute;
+      z-index: 3;
+      top: 50%;
+      left: 50%;
+      width: 270px;
+      height: 230px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .coil-loop {
+      position: absolute;
+      top: 0;
+      width: 42px;
+      height: 230px;
+      border: 6px solid var(--copper);
+      border-radius: 50%;
+      box-shadow: 2px 0 0 rgba(93, 54, 31, 0.18), inset 2px 0 0 rgba(255, 220, 165, 0.45);
+    }
+
+    .coil-loop:nth-child(1) { left: 0; }
+    .coil-loop:nth-child(2) { left: 34px; }
+    .coil-loop:nth-child(3) { left: 68px; }
+    .coil-loop:nth-child(4) { left: 102px; }
+    .coil-loop:nth-child(5) { left: 136px; }
+    .coil-loop:nth-child(6) { left: 170px; }
+    .coil-loop:nth-child(7) { left: 204px; }
+
+    .coil-label {
+      position: absolute;
+      top: calc(50% + 120px);
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--copper);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .magnet {
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      left: 4%;
+      display: flex;
+      width: 235px;
+      height: 82px;
+      cursor: grab;
+      user-select: none;
+      border: 3px solid var(--ink);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 12px 20px rgba(23, 33, 43, 0.2);
+      touch-action: none;
+    }
+
+    .magnet:active { cursor: grabbing; }
+    .pole { display: grid; flex: 1; place-items: center; font-size: 1.55rem; font-weight: 900; }
+    .north { color: #fff; background: var(--red); }
+    .south { color: var(--ink); background: #fffdf7; }
+
+    .direction {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      color: #d4d4d4;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transform: translateX(-50%);
+    }
+
+    .compass-grid {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-auto-rows: 1fr;
+      padding: 14px;
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .background-compass {
+      position: relative;
+      display: grid;
+      width: 24px;
+      height: 24px;
+      place-self: center;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 50%;
+      background: rgba(15, 21, 25, 0.7);
+      box-shadow: 0 0 0 2px rgba(23, 126, 137, 0.1);
+    }
+
+    .background-compass::before, .background-compass::after {
+      position: absolute;
+      content: '';
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .background-compass::before { top: 3px; bottom: 3px; left: 50%; width: 1px; }
+    .background-compass::after { top: 50%; right: 3px; left: 3px; height: 1px; }
+
+    .background-needle {
+      width: 18px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red) 0 50%, #fffdf7 50% 100%);
+      transform: rotate(-25deg);
+    }
+
+    .meter {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 145px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 247, 0.9);
+    }
+
+    .meter-label { display: flex; justify-content: space-between; margin-bottom: 12px; color: var(--muted); font-size: 0.68rem; font-weight: 800; text-transform: uppercase; }
+    .meter-face { position: relative; height: 62px; overflow: hidden; border: 2px solid var(--ink); border-radius: 75px 75px 0 0; background: #f3eee2; }
+    .meter-face::after { position: absolute; right: 50%; bottom: 0; width: 2px; height: 90%; content: ''; background: var(--red-dark); transform-origin: bottom; transform: rotate(var(--needle-turn, 0deg)); transition: transform 80ms linear; }
+    .meter-center { position: absolute; right: 50%; bottom: 5px; z-index: 1; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); transform: translateX(50%); }
+    .meter-value { margin: 9px 0 0; font-size: 1.1rem; font-weight: 900; text-align: center; }
+
+    .controls { display: grid; grid-template-columns: 1fr 1fr 1fr auto auto; align-items: center; gap: 14px; margin-top: 22px; }
+    .progress-wrap { display: grid; gap: 8px; }
+    .progress-wrap label { color: var(--muted); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+    .progress { height: 9px; overflow: hidden; background: #e9e0d1; }
+    .progress span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, var(--teal), var(--red)); transition: width 120ms ease; }
+    .speed-control, .turns-control { display: grid; gap: 8px; }
+    .speed-control label, .turns-control label { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+    .speed-control output, .turns-control output { color: var(--red-dark); }
+    .speed-control input, .turns-control input { width: 100%; accent-color: var(--red); cursor: pointer; }
+
+    button { border: 0; padding: 12px 15px; color: #fff; background: var(--ink); cursor: pointer; font: inherit; font-size: 0.8rem; font-weight: 800; }
+    button:hover { background: var(--red-dark); }
+    button.secondary { color: var(--ink); background: #e9e0d1; }
+
+    aside { display: grid; align-content: start; gap: 14px; }
+    .panel { padding: 21px; border-top: 3px solid var(--red); background: rgba(255, 253, 247, 0.72); }
+    .panel h3 { margin: 0 0 13px; font-family: Georgia, serif; font-size: 1.22rem; }
+    .panel p { margin-bottom: 0; color: var(--muted); font-size: 0.86rem; line-height: 1.65; }
+    .rule { display: flex; gap: 10px; align-items: start; margin: 13px 0 0; color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+    .rule b { display: grid; flex: 0 0 22px; height: 22px; place-items: center; color: #fff; background: var(--red); font-size: 0.7rem; }
+
+    .led { display: inline-block; width: 11px; height: 11px; margin-right: 7px; border-radius: 50%; background: #c9c4b8; vertical-align: -1px; }
+    .led.on { background: var(--glow); box-shadow: 0 0 14px 5px rgba(255, 216, 106, 0.75); }
+
+    @media (max-width: 820px) {
+      header { display: block; }
+      .status { width: fit-content; margin-top: 20px; }
+      .layout { grid-template-columns: 1fr; }
+      aside { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 12px; }
+      .layout { margin-top: 15px; }
+      .lab { height: 340px; }
+      .magnet { width: 190px; height: 66px; }
+      .coil { width: 270px; height: 230px; transform: translate(-50%, -50%) scale(0.78); }
+      .meter { top: 12px; right: 12px; transform: scale(0.82); transform-origin: top right; }
+      .controls { grid-template-columns: 1fr 1fr; }
+      .progress-wrap, .speed-control, .turns-control { grid-column: 1 / -1; }
+      aside { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <p class="eyebrow">Phòng thí nghiệm · Vật lý 09</p>
+        <h1>Faraday trong một chuyển động.</h1>
+        <p class="subtitle">Kéo thanh nam châm xuyên qua cuộn dây. Khi từ thông thay đổi, dòng điện cảm ứng xuất hiện.</p>
+      </div>
+      <div class="status"><small>Trạng thái thí nghiệm</small><strong id="experimentStatus">Sẵn sàng</strong></div>
+    </header>
+
+    <div class="layout">
+      <section class="experiment" aria-label="Mô phỏng thí nghiệm Faraday">
+        <div class="experiment-head">
+          <div>
+            <h2>Tạo dòng điện cảm ứng</h2>
+            <p>Đưa nam châm qua lại qua cuộn dây bằng chuột hoặc ngón tay.</p>
+          </div>
+          <div class="score">Điểm: <span id="score">0</span></div>
+        </div>
+
+        <div class="lab" id="lab">
+          <div class="compass-grid" id="compassGrid" aria-label="Lưới các la bàn, mỗi ô là một đơn vị đo"></div>
+          <div class="coil" aria-label="Cuộn dây đồng gồm bảy vòng dây">
+            <span class="coil-loop"></span>
+            <span class="coil-loop"></span>
+            <span class="coil-loop"></span>
+            <span class="coil-loop"></span>
+            <span class="coil-loop"></span>
+            <span class="coil-loop"></span>
+            <span class="coil-loop"></span>
+          </div>
+          <div class="coil-label">cuộn dây</div>
+          <div class="magnet" id="magnet" role="slider" aria-label="Thanh nam châm kéo được" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4" tabindex="0">
+            <div class="pole north">BẮC</div>
+            <div class="pole south">NAM</div>
+          </div>
+          <div class="meter">
+            <div class="meter-label"><span>Galvanometer</span><span>A</span></div>
+            <div class="meter-face"><span class="meter-center"></span></div>
+            <p class="meter-value" id="currentValue">0.00 A</p>
+            <span class="led" id="led"></span><span style="font-size: .72rem; color: var(--muted);">đèn cảm ứng</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="progress-wrap"><label for="energy">Năng lượng cảm ứng</label><div class="progress"><span id="energy"></span></div></div>
+          <div class="speed-control"><label for="speed">Tốc độ tự chạy <output id="speedValue">1.00x</output></label><input id="speed" type="range" min="0.25" max="2" step="0.25" value="1" aria-label="Điều chỉnh tốc độ nam châm"></div>
+          <div class="turns-control"><label for="turns">Số vòng dây <output id="turnsValue">7</output></label><input id="turns" type="range" min="3" max="12" step="1" value="7" aria-label="Điều chỉnh số vòng dây"></div>
+          <button id="demoButton" type="button">Tự chạy</button>
+          <button class="secondary" id="resetButton" type="button">Đặt lại</button>
+        </div>
+      </section>
+
+      <aside>
+        <section class="panel">
+          <h3>Nhiệm vụ</h3>
+          <p>Thắp sáng đèn cảm ứng bằng cách tạo ra chuyển động đủ nhanh qua cuộn dây.</p>
+          <div class="rule"><b>01</b><span>Giữ nam châm và kéo xuyên qua tâm cuộn dây.</span></div>
+          <div class="rule"><b>02</b><span>Đổi chiều chuyển động để kim lệch sang phía đối diện.</span></div>
+          <div class="rule"><b>03</b><span>Đạt 100% năng lượng để hoàn thành thí nghiệm.</span></div>
+        </section>
+        <section class="panel">
+          <h3>Định luật Faraday</h3>
+          <p>Suất điện động cảm ứng tăng khi từ thông qua cuộn dây thay đổi nhanh hơn.</p>
+          <p style="margin-top: 12px; color: var(--ink); font-family: Georgia, serif; font-size: 1.08rem;">ε = − ΔΦ / Δt</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const lab = document.getElementById('lab');
+    const magnet = document.getElementById('magnet');
+    const coil = document.querySelector('.coil');
+    const meterFace = document.querySelector('.meter-face');
+    const currentValue = document.getElementById('currentValue');
+    const energyBar = document.getElementById('energy');
+    const led = document.getElementById('led');
+    const scoreElement = document.getElementById('score');
+    const statusElement = document.getElementById('experimentStatus');
+    const demoButton = document.getElementById('demoButton');
+    const resetButton = document.getElementById('resetButton');
+    const speedControl = document.getElementById('speed');
+    const speedValue = document.getElementById('speedValue');
+    const turnsControl = document.getElementById('turns');
+    const turnsValue = document.getElementById('turnsValue');
+    const compassGrid = document.getElementById('compassGrid');
+    const backgroundCompasses = [];
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let lastTime = 0;
+    let energy = 0;
+    let score = 0;
+    let demoTimer = null;
+
+    function renderCoil(turns) {
+      coil.innerHTML = '';
+      const loopWidth = 42;
+      const spacing = turns > 1 ? (coil.clientWidth - loopWidth) / (turns - 1) : 0;
+      for (let index = 0; index < turns; index += 1) {
+        const loop = document.createElement('span');
+        loop.className = 'coil-loop';
+        loop.style.left = `${index * spacing}px`;
+        coil.appendChild(loop);
+      }
+      coil.setAttribute('aria-label', `Cuộn dây đồng gồm ${turns} vòng dây`);
+    }
+
+    function createCompassGrid() {
+      for (let index = 0; index < 80; index += 1) {
+        const compass = document.createElement('div');
+        const needle = document.createElement('span');
+        compass.className = 'background-compass';
+        needle.className = 'background-needle';
+        compass.appendChild(needle);
+        compassGrid.appendChild(compass);
+        backgroundCompasses.push({ compass, needle });
+      }
+    }
+
+    function updateCompassGrid(centerX, centerY) {
+      const labRect = lab.getBoundingClientRect();
+      const northX = centerX - magnet.offsetWidth / 4;
+      const southX = centerX + magnet.offsetWidth / 4;
+      backgroundCompasses.forEach(({ compass, needle }) => {
+        const compassRect = compass.getBoundingClientRect();
+        const pointX = compassRect.left - labRect.left + compassRect.width / 2;
+        const pointY = compassRect.top - labRect.top + compassRect.height / 2;
+        const northDistance = Math.max(10, Math.hypot(pointX - northX, pointY - centerY));
+        const southDistance = Math.max(10, Math.hypot(pointX - southX, pointY - centerY));
+        const fieldX = (pointX - northX) / northDistance + (southX - pointX) / southDistance;
+        const fieldY = (pointY - centerY) / northDistance + (centerY - pointY) / southDistance;
+        const angle = Math.atan2(fieldY, fieldX) * 180 / Math.PI;
+        needle.style.transform = `rotate(${angle}deg)`;
+      });
+    }
+
+    function setPosition(nextXPosition, nextYPosition = magnet.offsetTop, now = performance.now()) {
+      const maxPosition = lab.clientWidth - magnet.offsetWidth - 12;
+      const maxYPosition = lab.clientHeight - magnet.offsetHeight - 12;
+      const nextX = Math.max(4, Math.min(maxPosition, nextXPosition));
+      const nextY = Math.max(4, Math.min(maxYPosition, nextYPosition));
+      const centerX = nextX + magnet.offsetWidth / 2;
+      const centerY = nextY + magnet.offsetHeight / 2;
+      const coilCenterX = lab.clientWidth / 2;
+      const coilCenterY = lab.clientHeight / 2;
+      const distance = Math.hypot(centerX - coilCenterX, centerY - coilCenterY);
+      const elapsed = Math.max(16, now - lastTime);
+      const movementX = nextX - lastX;
+      const movementY = nextY - lastY;
+      const velocity = lastTime ? Math.hypot(movementX, movementY) / elapsed : 0;
+      const direction = Math.sign(movementX || -movementY);
+      const proximity = Math.max(0, 1 - distance / (Math.min(lab.clientWidth, lab.clientHeight) * 0.72));
+      const intensity = Math.min(1, Math.abs(velocity) * 0.9 * (0.35 + proximity));
+      const signedIntensity = Math.max(-1, Math.min(1, direction * velocity * 4 * (0.35 + proximity)));
+
+      magnet.style.left = `${nextX}px`;
+      magnet.style.top = `${nextY}px`;
+      updateCompassGrid(centerX, centerY);
+      magnet.setAttribute('aria-valuenow', Math.round(nextX / maxPosition * 100));
+      meterFace.style.setProperty('--needle-turn', `${signedIntensity * 46}deg`);
+      meterFace.style.background = intensity > 0.12 ? '#fff4cf' : '#f3eee2';
+      meterFace.style.boxShadow = intensity > 0.12 ? '0 0 18px rgba(255, 216, 106, .55)' : 'none';
+      currentValue.textContent = `${(signedIntensity * 2).toFixed(2)} A`;
+      led.classList.toggle('on', intensity > 0.12);
+      statusElement.textContent = intensity > 0.12 ? 'Có dòng cảm ứng' : 'Sẵn sàng';
+      if (intensity > 0.12) {
+        energy = Math.min(100, energy + intensity * 2.5);
+        energyBar.style.width = `${energy}%`;
+        if (energy >= 100 && score === 0) {
+          score = 100;
+          scoreElement.textContent = score;
+          statusElement.textContent = 'Hoàn thành nhiệm vụ';
+        }
+      }
+      lastX = nextX;
+      lastY = nextY;
+      lastTime = now;
+    }
+
+    function pointerPosition(event) {
+      const rect = lab.getBoundingClientRect();
+      return {
+        x: event.clientX - rect.left - magnet.offsetWidth / 2,
+        y: event.clientY - rect.top - magnet.offsetHeight / 2
+      };
+    }
+
+    magnet.addEventListener('pointerdown', event => {
+      dragging = true;
+      magnet.setPointerCapture(event.pointerId);
+      lastTime = performance.now();
+      lastX = magnet.offsetLeft;
+      lastY = magnet.offsetTop;
+    });
+
+    magnet.addEventListener('pointermove', event => {
+      if (dragging) {
+        const pointer = pointerPosition(event);
+        setPosition(pointer.x, pointer.y);
+      }
+    });
+
+    magnet.addEventListener('pointerup', () => { dragging = false; });
+    magnet.addEventListener('pointercancel', () => { dragging = false; });
+
+    magnet.addEventListener('keydown', event => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+        event.preventDefault();
+        const horizontalStep = event.key === 'ArrowRight' ? 18 : event.key === 'ArrowLeft' ? -18 : 0;
+        const verticalStep = event.key === 'ArrowDown' ? 18 : event.key === 'ArrowUp' ? -18 : 0;
+        setPosition(magnet.offsetLeft + horizontalStep, magnet.offsetTop + verticalStep);
+      }
+    });
+
+    demoButton.addEventListener('click', () => {
+      if (demoTimer) {
+        clearInterval(demoTimer);
+        demoTimer = null;
+        demoButton.textContent = 'Tự chạy';
+        return;
+      }
+      demoButton.textContent = 'Dừng lại';
+      let direction = 1;
+      demoTimer = setInterval(() => {
+        const maxPosition = lab.clientWidth - magnet.offsetWidth - 12;
+        const next = magnet.offsetLeft + direction * 9 * Number(speedControl.value);
+        if (next >= maxPosition || next <= 4) direction *= -1;
+        setPosition(next, magnet.offsetTop);
+      }, 55);
+    });
+
+    speedControl.addEventListener('input', () => {
+      speedValue.textContent = `${Number(speedControl.value).toFixed(2)}x`;
+    });
+
+    turnsControl.addEventListener('input', () => {
+      const turns = Number(turnsControl.value);
+      turnsValue.textContent = turns;
+      renderCoil(turns);
+    });
+
+    resetButton.addEventListener('click', () => {
+      if (demoTimer) clearInterval(demoTimer);
+      demoTimer = null;
+      demoButton.textContent = 'Tự chạy';
+      energy = 0;
+      score = 0;
+      energyBar.style.width = '0%';
+      scoreElement.textContent = '0';
+      currentValue.textContent = '0.00 A';
+      led.classList.remove('on');
+      statusElement.textContent = 'Sẵn sàng';
+      lastTime = 0;
+      setPosition(4, (lab.clientHeight - magnet.offsetHeight) / 2);
+    });
+
+    renderCoil(Number(turnsControl.value));
+    createCompassGrid();
+    window.addEventListener('resize', () => setPosition(magnet.offsetLeft, magnet.offsetTop));
+    setPosition(4, (lab.clientHeight - magnet.offsetHeight) / 2);
+  </script>
+</body>
+</html>
