@@ -261,15 +261,31 @@
     }
 
     @media (max-width: 560px) {
-      body { padding: 12px; }
-      .layout { margin-top: 15px; }
-      .lab { height: 340px; }
-      .magnet { width: 190px; height: 66px; }
-      .coil { width: 270px; height: 230px; transform: translate(-50%, -50%) scale(0.78); }
-      .meter { top: 12px; right: 12px; transform: scale(0.82); transform-origin: top right; }
-      .controls { grid-template-columns: 1fr 1fr; }
-      .progress-wrap, .speed-control, .turns-control { grid-column: 1 / -1; }
+      body { padding: 10px; }
+      header { padding: 14px 4px 22px; }
+      h1 { font-size: clamp(2.65rem, 13vw, 4rem); line-height: 0.98; }
+      .subtitle { font-size: 0.92rem; line-height: 1.6; }
+      .status { width: 100%; min-width: 0; margin-top: 18px; }
+      .layout { gap: 16px; margin-top: 16px; }
+      .experiment { padding: 16px; }
+      .experiment-head { display: block; }
+      .experiment-head p { max-width: 31rem; line-height: 1.55; }
+      .score { display: block; margin-top: 12px; }
+      .lab { height: 300px; margin-top: 20px; }
+      .magnet { width: 158px; height: 55px; }
+      .pole { font-size: 1.05rem; }
+      .coil { width: 220px; height: 190px; transform: translate(-50%, -50%); }
+      .coil-loop { width: 34px; height: 190px; border-width: 5px; }
+      .coil-label { top: calc(50% + 101px); font-size: 0.62rem; }
+      .meter { top: 10px; right: 10px; width: 122px; padding: 9px; transform: none; }
+      .meter-label { margin-bottom: 8px; font-size: 0.58rem; }
+      .meter-face { height: 48px; }
+      .meter-value { margin-top: 6px; font-size: 0.92rem; }
+      .controls { grid-template-columns: 1fr; gap: 16px; margin-top: 20px; }
+      .progress-wrap, .speed-control, .turns-control { grid-column: auto; }
+      .controls button { width: 100%; min-height: 44px; }
       aside { grid-template-columns: 1fr; }
+      .panel { padding: 17px; }
     }
   </style>
 </head>
